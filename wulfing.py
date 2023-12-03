@@ -9,7 +9,6 @@ import discord
 from dotenv import load_dotenv
 from discord.ext import commands
 import os
-# from login_part import access_token
 
 load_dotenv()
 
@@ -20,10 +19,12 @@ if bot_token is None:
 
 intents = discord.Intents.default()
 intents.members = True
+intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 member_list = []
 Role = "Newbie"
+filtered_message = ["chinese", "motherfucker"]
 
 @bot.event
 async def on_ready():
@@ -44,10 +45,23 @@ async def on_member_join(member):
         print("Nope it's a bot, i can't send him a message")
     member_list.append(member.name)
     print("\n".join(member_list))
+    
+@bot.event
+async def on_message(message):
+    if message.author.bot or message.type == discord.MessageType.new_member:
+        return
+    print(f"{message.author}: {message.content}")
+    content_lower = message.content.lower()
+    for phrase in filtered_message:
+        print(f"My phrase {phrase}")
+        print(f"content lower {content_lower}")
+        if phrase == content_lower:
+            await message.channel.send(f'{message.author.mention} please do not use this word here')
+            return
+    await bot.process_commands(message)
             
 @bot.command(name="Validate")
 async def validate_member(ctx):
-    print("vaise je suis la")
     guild = bot.guilds[0]
     member = guild.get_member_named(ctx.author.name)
     if member:
@@ -57,6 +71,13 @@ async def validate_member(ctx):
         await member.add_roles(validate_role)
     else:
         print("Nope, no member found")
+
+@bot.event
+async def on_member_remove(member):
+    global member_list
+    print(f'{member.name} has left the server')
+    member_list.remove(member.name)
+    print("\n".join(member_list))
             
 bot.run(bot_token)
 
