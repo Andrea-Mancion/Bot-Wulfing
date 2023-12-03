@@ -8,6 +8,7 @@
 import discord
 from dotenv import load_dotenv
 from discord.ext import commands
+import csv
 import os
 
 load_dotenv()
@@ -24,7 +25,13 @@ intents.message_content = True
 bot = commands.Bot(command_prefix='!', intents=intents)
 member_list = []
 Role = "Newbie"
-filtered_message = ["chinese", "motherfucker"]
+
+def load_dataset(filePath):
+    with open(filePath, 'r') as file:
+        reader = csv.DictReader(file)
+        return [row['word'] for row in reader]
+    
+filtered_message = load_dataset('filtered_word.csv')
 
 @bot.event
 async def on_ready():
@@ -46,18 +53,21 @@ async def on_member_join(member):
     member_list.append(member.name)
     print("\n".join(member_list))
     
+def racistContent(filtered_message, content_lower):
+    for word in filtered_message:
+        if word in content_lower:
+            return True
+    return False
+    
 @bot.event
 async def on_message(message):
     if message.author.bot or message.type == discord.MessageType.new_member:
         return
     print(f"{message.author}: {message.content}")
     content_lower = message.content.lower()
-    for phrase in filtered_message:
-        print(f"My phrase {phrase}")
-        print(f"content lower {content_lower}")
-        if phrase == content_lower:
-            await message.channel.send(f'{message.author.mention} please do not use this word here')
-            return
+    if racistContent(filtered_message, content_lower):
+        await message.channel.send(f'{message.author.mention} please do not use this word here')
+        return
     await bot.process_commands(message)
             
 @bot.command(name="Validate")
