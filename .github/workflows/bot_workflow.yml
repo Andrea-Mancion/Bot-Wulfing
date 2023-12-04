@@ -2,7 +2,7 @@ name: Run Discord Bot
 
 on:
   schedule:
-    - cron: '17 13 * * *'
+    - cron: '0 0 * * *'
 
 jobs:
   run-bot:
