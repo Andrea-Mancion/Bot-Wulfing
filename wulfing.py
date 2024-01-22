@@ -81,6 +81,22 @@ async def validate_member(ctx):
         await member.add_roles(validate_role)
     else:
         print("Nope, no member found")
+    
+@bot.command(name="WhoAreYou?")
+async def who_are_you(ctx):
+    await ctx.send(f'I am {bot.user.name}! I am a bot created by the Wulfing team to help you in your journey in the game Final Fantasy XIV.')
+    
+@bot.command(name="Help")
+async def help(ctx):
+    await ctx.send(f'Here is the list of commands you can use: \n !WhoAreYou? \n !Help \n !Validate')
+    
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        await ctx.send(f'I am sorry {ctx.author.mention}, I do not understand what you mean.')
+        await ctx.send(f'Please type !Help to see the list of commands.')
+        return
+    raise error
 
 @bot.event
 async def on_member_remove(member):
